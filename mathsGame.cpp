@@ -87,7 +87,7 @@ struct stQize
 	int NumberOfWrondAnswer = 0;
 	emLevel typeOfLevel;
 	emOperation typeOfOperation;
-	bool isPass;
+	bool IsPass;
 };
 
 int simpleCalculator(int num1, int num2, emOperation oprType)
@@ -98,7 +98,7 @@ int simpleCalculator(int num1, int num2, emOperation oprType)
 		return num1 + num2;
 		break;
 	case emOperation::sub:
-		return num1 / num2;
+		return num1 - num2;
 		break;
 	case emOperation::mult:
 		return num1 * num2;
@@ -109,7 +109,7 @@ int simpleCalculator(int num1, int num2, emOperation oprType)
 	}
 }
 
-stQuestion choicLevel(emLevel level, emOperation oprType)
+stQuestion GenerateQuestion(emLevel level, emOperation oprType)
 {
 	stQuestion Question;
 
@@ -117,6 +117,9 @@ stQuestion choicLevel(emLevel level, emOperation oprType)
 		level = (emLevel)RandomNumbers(1, 3);
 	if (oprType == emOperation::mixOp)
 		oprType = (emOperation)RandomNumbers(1, 4);
+
+	Question.oprType = oprType;
+	Question.QuestionLevel = level;
 
 	switch (level)
 	{
@@ -140,14 +143,32 @@ stQuestion choicLevel(emLevel level, emOperation oprType)
 		break;
 	}
 }
-void printRoundResult()
+
+string printTextOfLevel(emLevel level)
 {
-	stQuestion Question;
-	cout << "_______________________________ \n";
-	cout << "Question [" << endl;
-	cout << Question.firstNum << endl
-		 << Question.secNum;
+	string arr[4] = {"Easy", "Med", "Hard", "Mix"};
+	return arr[level - 1];
 }
+
+string printTextOfOprType(emOperation opr)
+{
+	string arr[5] = {"Add", "Sub", "Mul", "Div", "Mix"};
+	return arr[opr - 1];
+}
+
+int colorScreen(bool IsCorrect)
+{
+
+	if (IsCorrect)
+		return system("color 2f");
+	else
+		return system("color 4f");
+}
+
+void question()
+{
+}
+
 void ResetScreen()
 {
 	system("cls");
@@ -163,7 +184,6 @@ void startGame()
 		ReadHowManyQuestion();
 		ReadLevel();
 		ReadOperation();
-		printRoundResult();
 		cout << endl
 			 << " Do you want to play again? Y/N? ";
 		cin >> playAgian;
