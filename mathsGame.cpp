@@ -24,25 +24,25 @@ enum emWinner
 	computer = 2
 };
 
-int ReadHowManyQuestions()
+int ReadHowManyQuestion()
 {
-	int numOfQuestions;
+	int numOfQuestion;
 	do
 	{
-		cout << "How Many Questions do you want to answer ? ";
-		cin >> numOfQuestions;
+		cout << "How Many Question do you want to answer ? ";
+		cin >> numOfQuestion;
 		cout << endl;
-	} while (numOfQuestions < 1 || numOfQuestions > 10);
+	} while (numOfQuestion < 1 || numOfQuestion > 10);
 
-	return numOfQuestions;
+	return numOfQuestion;
 }
 
-int ReadLevel()
+emLevel ReadLevel()
 {
 	int level;
 	do
 	{
-		cout << "Choose Questions Level Easy:[1] , Medain:[2] , Hard:[3] , Mix:[4] ? ";
+		cout << "Choose Question Level Easy:[1] , Medain:[2] , Hard:[3] , Mix:[4] ? ";
 		cin >> level;
 		cout << endl;
 	} while (level < 1 || level > 4);
@@ -50,7 +50,7 @@ int ReadLevel()
 	return (emLevel)level;
 }
 
-int ReadOperation()
+emOperation ReadOperation()
 {
 	int Opr;
 	do
@@ -68,39 +68,85 @@ int RandomNumbers(int from, int to)
 	return rand() % (to - from + 1) + from;
 }
 
-struct stRoundInfo
+struct stQuestion
 {
-	short numOfRound;
+	short numOfQuestion;
 	int firstNum;
 	int secNum;
-	int result;
+	int playerAnswer;
+	bool checkAnswer;
+	int correctAnswer;
+	emLevel QuestionLevel;
+	emOperation oprType;
 };
 
-void choicLevel(emLevel level)
+struct stQize
 {
-	stRoundInfo RoundInfo;
+	int numOfQuestion;
+	int NumberOfCorrectAnswer = 0;
+	int NumberOfWrondAnswer = 0;
+	emLevel typeOfLevel;
+	emOperation typeOfOperation;
+	bool isPass;
+};
+
+int simpleCalculator(int num1, int num2, emOperation oprType)
+{
+	switch (oprType)
+	{
+	case emOperation::sum:
+		return num1 + num2;
+		break;
+	case emOperation::sub:
+		return num1 / num2;
+		break;
+	case emOperation::mult:
+		return num1 * num2;
+		break;
+	case emOperation::divid:
+		return num1 / num2;
+		break;
+	}
+}
+
+stQuestion choicLevel(emLevel level, emOperation oprType)
+{
+	stQuestion Question;
+
+	if (level == emLevel::mix)
+		level = (emLevel)RandomNumbers(1, 3);
+	if (oprType == emOperation::mixOp)
+		oprType = (emOperation)RandomNumbers(1, 4);
+
 	switch (level)
 	{
 	case emLevel::esay:
-		RoundInfo.firstNum = RandomNumbers(1, 10);
-		RoundInfo.secNum = RandomNumbers(1, 10);
+		Question.firstNum = RandomNumbers(1, 10);
+		Question.secNum = RandomNumbers(1, 10);
+		Question.correctAnswer = simpleCalculator(Question.firstNum, Question.secNum, oprType);
+		return Question;
 		break;
 	case emLevel::med:
-		RoundInfo.firstNum = RandomNumbers(21, 50);
-		RoundInfo.secNum = RandomNumbers(21, 50);
+		Question.firstNum = RandomNumbers(21, 50);
+		Question.secNum = RandomNumbers(21, 50);
+		Question.correctAnswer = simpleCalculator(Question.firstNum, Question.secNum, oprType);
+		return Question;
 		break;
 	case emLevel::hard:
-		RoundInfo.firstNum = RandomNumbers(51, 100);
-		RoundInfo.secNum = RandomNumbers(51, 100);
+		Question.firstNum = RandomNumbers(51, 100);
+		Question.correctAnswer = Question.secNum = RandomNumbers(51, 100);
+		simpleCalculator(Question.firstNum, Question.secNum, oprType);
+		return Question;
 		break;
 	}
 }
 void printRoundResult()
 {
-	stRoundInfo RoundInfo;
+	stQuestion Question;
 	cout << "_______________________________ \n";
 	cout << "Question [" << endl;
-	cout << RoundInfo.firstNum << endl <<RoundInfo.secNum;
+	cout << Question.firstNum << endl
+		 << Question.secNum;
 }
 void ResetScreen()
 {
@@ -114,11 +160,12 @@ void startGame()
 	do
 	{
 		ResetScreen();
-		ReadHowManyQuestions();
+		ReadHowManyQuestion();
 		ReadLevel();
 		ReadOperation();
 		printRoundResult();
-		cout << "\tDo you want to play again? Y/N? ";
+		cout << endl
+			 << " Do you want to play again? Y/N? ";
 		cin >> playAgian;
 	} while (playAgian == 'Y' || playAgian == 'y');
 }
