@@ -82,6 +82,7 @@ struct stQuestion
 
 struct stQize
 {
+	stQuestion QuestionList[100];
 	int numOfQuestion;
 	int NumberOfCorrectAnswer = 0;
 	int NumberOfWrondAnswer = 0;
@@ -156,17 +157,82 @@ string printTextOfOprType(emOperation opr)
 	return arr[opr - 1];
 }
 
+char printOprSymobl(emOperation oprType)
+{
+	switch (oprType)
+	{
+	case emOperation::sum:
+		return '+';
+		break;
+	case emOperation::sub:
+		return '-';
+		break;
+	case emOperation::mult:
+		return '*';
+		break;
+	case emOperation::divid:
+		return '/';
+		break;
+	}
+}
+
 int colorScreen(bool IsCorrect)
 {
-
 	if (IsCorrect)
 		return system("color 2f");
 	else
 		return system("color 4f");
 }
 
-void question()
+void GenerateQizeQuestion(stQize Qize)
 {
+	for (int QuestionNum = 1; QuestionNum <= Qize.numOfQuestion; QuestionNum++)
+	{
+		Qize.QuestionList[QuestionNum] = GenerateQuestion(Qize.typeOfLevel, Qize.typeOfOperation);
+	}
+}
+
+void printQuestion(int QustionNum, stQize qize)
+{
+	cout << " Question [" << QustionNum + 1 << "/" << qize.numOfQuestion << "]: \n ";
+	cout << "\t" << qize.QuestionList[QustionNum].firstNum << endl;
+	cout << printOprSymobl(qize.typeOfOperation) << endl;
+	cout << "\t" << qize.QuestionList[QustionNum].secNum << endl;
+	cout << " _______ \n";
+}
+
+int ReadPlayerAnswer()
+{
+	int answer;
+	cin >> answer;
+	return answer;
+}
+
+void CheckPlayerAnswer(stQize Qize, int QuestionNum)
+{
+	if (Qize.QuestionList[QuestionNum].correctAnswer == Qize.QuestionList[QuestionNum].playerAnswer)
+	{
+		cout << "Right Answer \n";
+		Qize.NumberOfCorrectAnswer++;
+		Qize.QuestionList[QuestionNum].checkAnswer = true;
+	}
+	else
+	{
+		cout << "Wrong Answer \n";
+		cout << "The Correct Answer is " << Qize.QuestionList[QuestionNum].correctAnswer<<endl;
+		Qize.NumberOfWrondAnswer++;
+		Qize.QuestionList[QuestionNum].checkAnswer = false;
+	}
+
+	Qize.IsPass = (Qize.NumberOfCorrectAnswer >= Qize.NumberOfWrondAnswer);
+}
+
+string PrintFinalResult(bool IsPass)
+{
+	if (IsPass)
+		return "Pass";
+	else
+		return "Fail";
 }
 
 void ResetScreen()
@@ -175,15 +241,23 @@ void ResetScreen()
 	system("color 0f");
 }
 
+void PlayMathsGame()
+{
+	stQize Qize;
+	Qize.numOfQuestion = ReadHowManyQuestion();
+	Qize.typeOfLevel = ReadLevel();
+	Qize.typeOfOperation = ReadOperation();
+
+	GenerateQizeQuestion(Qize);
+}
+
 void startGame()
 {
 	char playAgian;
 	do
 	{
 		ResetScreen();
-		ReadHowManyQuestion();
-		ReadLevel();
-		ReadOperation();
+		PlayMathsGame();
 		cout << endl
 			 << " Do you want to play again? Y/N? ";
 		cin >> playAgian;
