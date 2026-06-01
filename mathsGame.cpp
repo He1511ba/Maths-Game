@@ -18,11 +18,6 @@ enum emOperation
 	divid = 4,
 	mixOp = 5
 };
-enum emWinner
-{
-	player = 1,
-	computer = 2
-};
 
 int ReadHowManyQuestion()
 {
@@ -138,8 +133,8 @@ stQuestion GenerateQuestion(emLevel level, emOperation oprType)
 		break;
 	case emLevel::hard:
 		Question.firstNum = RandomNumbers(51, 100);
-		Question.correctAnswer = Question.secNum = RandomNumbers(51, 100);
-		simpleCalculator(Question.firstNum, Question.secNum, oprType);
+		Question.secNum = RandomNumbers(51, 100);
+		Question.correctAnswer = simpleCalculator(Question.firstNum, Question.secNum, oprType);
 		return Question;
 		break;
 	}
@@ -176,7 +171,7 @@ char printOprSymobl(emOperation oprType)
 	}
 }
 
-int colorScreen(bool IsCorrect)
+int setColorScreen(bool IsCorrect)
 {
 	if (IsCorrect)
 		return system("color 2f");
@@ -184,9 +179,9 @@ int colorScreen(bool IsCorrect)
 		return system("color 4f");
 }
 
-void GenerateQizeQuestion(stQize Qize)
+void GenerateQizeQuestion(stQize &Qize)
 {
-	for (int QuestionNum = 1; QuestionNum <= Qize.numOfQuestion; QuestionNum++)
+	for (int QuestionNum = 0; QuestionNum < Qize.numOfQuestion; QuestionNum++)
 	{
 		Qize.QuestionList[QuestionNum] = GenerateQuestion(Qize.typeOfLevel, Qize.typeOfOperation);
 	}
@@ -194,51 +189,85 @@ void GenerateQizeQuestion(stQize Qize)
 
 void printQuestion(int QustionNum, stQize qize)
 {
-	cout << " Question [" << QustionNum + 1 << "/" << qize.numOfQuestion << "]: \n ";
-	cout << "\t" << qize.QuestionList[QustionNum].firstNum << endl;
-	cout << printOprSymobl(qize.typeOfOperation) << endl;
-	cout << "\t" << qize.QuestionList[QustionNum].secNum << endl;
-	cout << " _______ \n";
+	cout << " Question [" << QustionNum + 1 << "/" << qize.numOfQuestion << "]: \n  ";
+	cout << qize.QuestionList[QustionNum].firstNum << endl;
+	cout << " " << printOprSymobl(qize.QuestionList[QustionNum].oprType) << endl;
+	cout << "  " << qize.QuestionList[QustionNum].secNum << endl;
+	cout << " ___________\n";
 }
 
 int ReadPlayerAnswer()
 {
 	int answer;
+	cout << "  ";
 	cin >> answer;
 	return answer;
 }
 
-void CheckPlayerAnswer(stQize Qize, int QuestionNum)
+void CheckPlayerAnswer(stQize &Qize, int QuestionNum)
 {
 	if (Qize.QuestionList[QuestionNum].correctAnswer == Qize.QuestionList[QuestionNum].playerAnswer)
 	{
-		cout << "Right Answer \n";
+		cout << " Right Answer ^_^ .\n";
 		Qize.NumberOfCorrectAnswer++;
 		Qize.QuestionList[QuestionNum].checkAnswer = true;
+		cout << "\n________________________________________________________________________________\n";
 	}
 	else
 	{
-		cout << "Wrong Answer \n";
-		cout << "The Correct Answer is " << Qize.QuestionList[QuestionNum].correctAnswer<<endl;
+		cout << " Wrong Answer >_< .\n";
+		cout << " The Correct Answer is " << Qize.QuestionList[QuestionNum].correctAnswer << endl;
 		Qize.NumberOfWrondAnswer++;
 		Qize.QuestionList[QuestionNum].checkAnswer = false;
+		cout << "\n________________________________________________________________________________\n";
 	}
 
 	Qize.IsPass = (Qize.NumberOfCorrectAnswer >= Qize.NumberOfWrondAnswer);
 }
 
+void askAndCorrectAswer(stQize &Qize)
+{
+	for (int QuestionNum = 0; QuestionNum < Qize.numOfQuestion; QuestionNum++)
+	{
+		printQuestion(QuestionNum, Qize);
+		Qize.QuestionList[QuestionNum].playerAnswer = ReadPlayerAnswer();
+		CheckPlayerAnswer(Qize, QuestionNum);
+		setColorScreen(Qize.QuestionList[QuestionNum].checkAnswer);
+	}
+}
+
 string PrintFinalResult(bool IsPass)
 {
 	if (IsPass)
-		return "Pass";
+		return "Pass ^_^ .";
 	else
-		return "Fail";
+		return "Fail >_< .";
 }
 
 void ResetScreen()
 {
 	system("cls");
 	system("color 0f");
+}
+
+int FinalColorScreen(bool IsPass)
+{
+	if (IsPass)
+		return system("color 2f");
+	else
+		return system("color 4f");
+}
+
+void ShowFinalResult(stQize Qize)
+{
+	cout << "\n_______________________________ [ Qize Result ] ________________________________\n\n";
+	cout << "\tNumber of Question      : " << Qize.numOfQuestion << endl;
+	cout << "\tQuestion Level          : " << printTextOfLevel(Qize.typeOfLevel) << endl;
+	cout << "\tOperation Type          : " << printTextOfOprType(Qize.typeOfOperation) << endl;
+	cout << "\tNumber of Right Answers : " << Qize.NumberOfCorrectAnswer << endl;
+	cout << "\tNumber of Wrong Answers : " << Qize.NumberOfWrondAnswer << endl;
+	cout << "\n\tYou are " << PrintFinalResult(Qize.IsPass) << endl;
+	cout << "\n________________________________________________________________________________\n\n";
 }
 
 void PlayMathsGame()
@@ -249,6 +278,9 @@ void PlayMathsGame()
 	Qize.typeOfOperation = ReadOperation();
 
 	GenerateQizeQuestion(Qize);
+	askAndCorrectAswer(Qize);
+	ShowFinalResult(Qize);
+	FinalColorScreen(Qize.IsPass);
 }
 
 void startGame()
